@@ -66,21 +66,24 @@ if len(sys.argv) < 5:
     sys.exit(1)
 
 lat1, lng1, lat2, lng2 = [float(arg) for arg in sys.argv[1:5]]
-sample_period_sec = int(sys.argv[5])*60 if len(sys.argv) > 5 else 5*60
-sample_rate_sec = int(sys.argv[6])*60 if len(sys.argv) > 6 else 1*60
+sample_period = int(sys.argv[5]) if len(sys.argv) > 5 else 5
+sample_period_sec = sample_period * 60
+sample_rate = int(sys.argv[6]) if len(sys.argv) > 6 else 1
+sample_rate_sec = sample_rate * 60
 read_cycles = (sample_period_sec // sample_rate_sec) + 1
 
 stations = get_stations((lat1, lng1), (lat2, lng2))
 readings  = []
 
 for i in range(read_cycles-1):
-    print(f'({i+1}/{read_cycles})\n')
+    print(f'({i+1}/{read_cycles}) readings\n')
     current_readings = read_all_stations(stations)
     readings += current_readings
+    print(f'\n{sample_period - (i*sample_rate)} minutes remaining...')
     print('\n\n')
     time.sleep(sample_rate_sec)
 
-print(f'({read_cycles}/{read_cycles})\n')
+print(f'({read_cycles}/{read_cycles}) readings\n')
 current_readings = read_all_stations(stations)
 readings += current_readings
 print('\n\n')
