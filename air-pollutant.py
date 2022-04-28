@@ -1,6 +1,7 @@
 import requests
 import sys
 import time
+from threading import Thread, Lock
 
 API_TOKEN =
 
@@ -40,10 +41,23 @@ def get_station_pm25(station_id):
 
 def read_all_stations(stations):
     readings = []
-    for station in stations:
+    reading_lock = Lock()
+
+    def read_station(station):
         pm25 = get_station_pm25(station.uid)
-        readings.append(pm25)
+        with reading_lock:
+            readings.append(pm25)
         print(f'{station.name}: {pm25}')
+
+    threads = []
+    for station in stations:
+        t = Thread(target=read_station, args=(station,))
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+
     return readings
 
 
